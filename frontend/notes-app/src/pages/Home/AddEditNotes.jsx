@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 
 const AddEditNotes = () => {
   return (
     <>
       <div>
+        {/* title */}
         <div className="flex flex-col gap-2">
           <label className="input-label">TITLE</label>
           <input
@@ -12,6 +13,8 @@ const AddEditNotes = () => {
             placeholder="Go To Gym At 5"
           />
         </div>
+
+        {/* content */}
         <div className="flex flex-col gap-2 mt-4">
           <label className="input-label">CONTENT</label>
           <textarea
@@ -21,9 +24,13 @@ const AddEditNotes = () => {
             rows={10}
           />
         </div>
+
+        {/* tags */}
         <div className="mt-3">
           <label className="input-label">TAGS</label>
         </div>
+
+        {/* buttons add */}
         <button className="btn-primary font-medium mt-5 p-3" onClick={() => {}}>
           ADD
         </button>
