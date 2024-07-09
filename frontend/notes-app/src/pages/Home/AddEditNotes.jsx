@@ -1,6 +1,11 @@
 import React, { useState } from "react";
+import TagInput from "../../components/Input/TagInput";
 
 const AddEditNotes = () => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
+
   return (
     <>
       <div>
@@ -11,6 +16,8 @@ const AddEditNotes = () => {
             type="text"
             className="text-2xl text-slate-950 outline-none"
             placeholder="Go To Gym At 5"
+            value={title}
+            onChange={({ target }) => setTitle(target.value)}
           />
         </div>
 
@@ -22,12 +29,15 @@ const AddEditNotes = () => {
             type="text"
             placeholder="Content"
             rows={10}
+            value={content}
+            onChange={({ target }) => setContent(target.value)}
           />
         </div>
 
         {/* tags */}
         <div className="mt-3">
           <label className="input-label">TAGS</label>
+          <TagInput tags={tags} setTags={setTags} />
         </div>
 
         {/* buttons add */}
@@ -38,5 +48,6 @@ const AddEditNotes = () => {
     </>
   );
 };
+// menit 49.44
 
 export default AddEditNotes;

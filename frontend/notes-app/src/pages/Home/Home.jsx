@@ -6,6 +6,7 @@ import AddEditNotes from "./AddEditNotes";
 import Modal from "react-modal";
 
 const Home = () => {
+  // state untuk mengatur modal
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
     type: "add",
@@ -37,15 +38,20 @@ const Home = () => {
       {/* button tambah (+) */}
       <button
         className="w-16 h-16 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600 absolute right-10 bottom-10"
+        // Ketika button diklik, state openAddEditModal akan diperbarui untuk menampilkan modal dengan jenis operasi "add".
         onClick={() => {
           setOpenAddEditModal({ isShown: true, type: "add", add: null });
         }}
       >
+        {/* icons + */}
         <MdAdd className="text-[32px] text-white" />
       </button>
+
+      {/* modal, manampilkan popup */}
       <Modal
-        isOpen={openAddEditModal.isShown}
-        onRequestClose={() => {}}
+        isOpen={openAddEditModal.isShown} //  Modal(Popup) akan tampil jika isShown adalah true
+        onRequestClose={() => {}} // Modal untuk close popup
+        // mengatur tampilan popup
         style={{
           overlay: {
             backgroundColor: "rgba(0,0,0,0.2)",
