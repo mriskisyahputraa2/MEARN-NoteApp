@@ -37,6 +37,7 @@ const AddEditNotes = () => {
         {/* tags */}
         <div className="mt-3">
           <label className="input-label">TAGS</label>
+          {/* import component tag input, dengan 2 parameter tags dan setTags */}
           <TagInput tags={tags} setTags={setTags} />
         </div>
 

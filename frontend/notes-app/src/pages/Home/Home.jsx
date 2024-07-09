@@ -64,7 +64,7 @@ const Home = () => {
       </Modal>
 
       {/* import component edit notes */}
-      <AddEditNotes />
+      {/* <AddEditNotes /> */}
     </>
   );
 };
