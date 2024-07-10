@@ -62,6 +62,9 @@ const Home = () => {
       >
         {/* import component edit notes */}
         <AddEditNotes
+          type={openAddEditModal.type} // mendapatkan type
+          noteData={openAddEditModal.data} // mendapatkan data
+          // Fungsi button onClose for popup AddEditNotes
           onClose={() => {
             setOpenAddEditModal({ isShown: false, type: "add", data: null });
           }}
