@@ -220,8 +220,26 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
 });
 
 // Get All Notes
-app.get("/get-all-note", authenticateToken, async (req, res) => {});
-// menit 1.33.57
+app.get("/get-all-note", authenticateToken, async (req, res) => {
+  const { user } = req.user;
+
+  try {
+    const notes = await Note.find({ userId: user._id }).sort({
+      isPinned: -1,
+    });
+
+    return res.json({
+      error: false,
+      notes,
+      message: "All notes retrieved successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+});
 
 app.listen(8000);
 module.exports = app;
