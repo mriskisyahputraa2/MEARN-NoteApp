@@ -1,37 +1,3 @@
-require("dotenv").config(); // import dotenv
-
-const config = require("./config.json"); // import config.json, sebagai penghubung ke database mongodb
-const mongoose = require("mongoose"); // import mongoose
-
-// import model
-const User = require("./models/user.model");
-const Note = require("./models/note.model");
-
-// menghubungkan ke database mongodb
-mongoose.connect(config.connectionString);
-
-const express = require("express"); // import express
-const cors = require("cors"); // import cors, untuk middleware
-const app = express();
-
-// import jsonwebtoken dan utilities
-const jwt = require("jsonwebtoken");
-const { authenticateToken } = require("./utilities"); // authenticateToken middleware dari jsonwebtoken
-
-app.use(express.json()); // menggunakan middleware json
-
-// Middleware ini mengaktifkan "CORS" dengan mengizinkan permintaan dari semua asal (origin: "*") ke server.
-app.use(
-  // origin adalah permintaan HTTP atau HTTPS, disini menggunakan "*", artinya keduanya untuk menerima server
-  cors({
-    origin: "*",
-  })
-);
-
-app.get("/", (req, res) => {
-  res.json({ data: "Hello" });
-});
-
 // Create Account
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body; // menangkap fullName, email, password dari permintaan request body
@@ -125,25 +91,6 @@ app.post("/login", async (req, res) => {
       .status(400)
       .json({ error: true, message: "Invalid Credentials" });
   }
-});
-
-// Get Single User, berdasarkan authenticateToken
-app.get("/get-user", authenticateToken, async (req, res) => {
-  const { user } = req.user;
-
-  const isUser = await User.findOne({ _id: user._id });
-
-  if (!isUser) return res.status(404);
-
-  return res.json({
-    user: {
-      fullName: isUser.fullName,
-      email: isUser.email,
-      _id: isUser._id,
-      createdOn: isUser.createdOn,
-    },
-    message: "",
-  });
 });
 
 // Add Notes, berdasarkan token jwt (authenticateToken)
@@ -294,45 +241,3 @@ app.delete("/delete-note/:noteId", authenticateToken, async (req, res) => {
       .json({ error: true, message: "Internal Server Error" });
   }
 });
-
-// Update isPinned Value
-app.put("/update-note-pinned/:noteId", authenticateToken, async (req, res) => {
-  const noteId = req.params.noteId; // mengambil id note yang sudah ditambahkan ke database
-  const { isPinned } = req.body; // mendapatkan isPinned sesuai yang dimasukkan pengguna
-  const { user } = req.user; // mendapatkan informasi pengguna melalui token user
-
-  // validasi
-  try {
-    // mecoba mencari note yang sudah ditambahka berdasarkan noteId dan userId
-    const note = await Note.findOne({
-      _id: noteId, // mendapatkan kode unik noteid
-      userId: user._id, // mendapatkan id pengguna
-    });
-
-    // validasi, jika note nya tidak ada
-    if (!note) {
-      return res.status(404).json({ error: true, message: "Note not found" });
-    }
-
-    note.isPinned = isPinned; // mengupdate properti isPinned(pin disematkan) pada not
-
-    // simpan data note yang sudah diupdate kedalam database
-    await note.save();
-
-    // jika berhasil, tampilkan error, note dan message
-    return res.json({
-      error: true,
-      note,
-      message: "Note updated successfully",
-    });
-    // jika gagal, maka tampilakn error, dan message
-  } catch (error) {
-    return res.status(500).json({
-      error: true,
-      message: "Internal Server Error",
-    });
-  }
-});
-
-app.listen(8000);
-module.exports = app;
