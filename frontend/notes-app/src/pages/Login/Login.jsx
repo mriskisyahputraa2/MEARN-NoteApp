@@ -32,23 +32,31 @@ const Login = () => {
 
     // Login API Call
     try {
+      // mengirim permintaan post ke endpoint "login"
       const response = await axiosInstance.post("login", {
+        // dengan email dan password
         email: email,
         password: password,
       });
 
+      // validasi, jika response data dan response data access token ada
       if (response.data && response.data.accessToken) {
-        localStorage.setItem("Token", response.data.accessToken);
-        navigate("/dashboard");
+        localStorage.setItem("token", response.data.accessToken); // token akan disimpan dalam localStorage dengan key "Token"
+        navigate("/dashboard"); // setelah berhasil, maka pengguna akan dibawa kehalaman dashboard
       }
+
+      //  jika terjadi error selama autentikasi
     } catch (error) {
+      // validasi, jika semua response error ini ada
       if (
         error.response &&
         error.response.data &&
         error.response.data.message
       ) {
+        // maka pesan kesalahan dari server ditetapkan ke state error menggunakan fungsi setError.
         setError(error.response.data.message);
       } else {
+        // jika tidak, maka tampilkan pesan "coba lagi"
         setError("An unexpected error occurred, Please try again.");
       }
     }
