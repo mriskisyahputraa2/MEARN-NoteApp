@@ -32,6 +32,8 @@ app.get("/", (req, res) => {
   res.json({ data: "Hello" });
 });
 
+// Backend Ready!!
+
 // Create Account
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body; // menangkap fullName, email, password dari permintaan request body
@@ -129,12 +131,15 @@ app.post("/login", async (req, res) => {
 
 // Get Single User, berdasarkan authenticateToken
 app.get("/get-user", authenticateToken, async (req, res) => {
-  const { user } = req.user;
+  const { user } = req.user; // mendapatkan auth user
 
+  // mencari dan mendapatkan id user
   const isUser = await User.findOne({ _id: user._id });
 
+  // validasi, jika user tidak ada maka response status 404
   if (!isUser) return res.status(404);
 
+  // jika user ada, maka tampilkan
   return res.json({
     user: {
       fullName: isUser.fullName,
