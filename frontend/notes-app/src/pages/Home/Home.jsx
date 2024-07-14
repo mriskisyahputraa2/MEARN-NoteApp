@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import NoteCard from "../../components/Cards/NoteCard";
+import moment from "moment";
 import { MdAdd } from "react-icons/md";
 import AddEditNotes from "./AddEditNotes";
 import Modal from "react-modal";
@@ -15,8 +16,8 @@ const Home = () => {
     data: null,
   });
 
-  // state untuk menyimpan informasi pengguna yang didapat dari server.
-  const [userInfo, setUserInfo] = useState(null);
+  const [allNote, setAllNote] = useState([]); // state untuk mengambil semua data note
+  const [userInfo, setUserInfo] = useState(null); // state untuk menyimpan informasi pengguna yang didapat dari server.
   const navigate = useNavigate();
 
   // Get User Info
@@ -38,9 +39,24 @@ const Home = () => {
     }
   };
 
+  // Get All Notes
+  const getAllNotes = async () => {
+    try {
+      const response = await axiosInstance.get("/get-all-note");
+      console.log(response);
+      if (response.data && response.data.notes) {
+        setAllNote(response.data.notes);
+      }
+    } catch (error) {
+      console.log("An unexpected error occurred. Please try again.");
+    }
+  };
+
   // useEffet, maninpulasi data getUserInfo
   useEffect(() => {
+    getAllNotes();
     getUserInfo(); // Memanggil getUserInfo sekali saat komponen pertama kali dirender (karena array dependensi kosong []).
+    return () => {};
   }, []);
 
   return (
@@ -50,16 +66,19 @@ const Home = () => {
 
       <div className="container mx-auto">
         <div className="grid grid-cols-3 gap-4 mt-8">
-          <NoteCard
-            title="Meeting on 8th July"
-            date="8rd July 2024"
-            content="Meeting on 8th July Meeting on 8th July"
-            tags="#Meeting"
-            isPinned={true}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onPinNote={() => {}}
-          />
+          {allNote.map((item, index) => (
+            <NoteCard
+              key={item._id}
+              title={item.title}
+              date={item.createdOn}
+              content={item.content}
+              tags={item.tags || []} // Pastikan tags adalah array
+              isPinned={item.isPinned}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onPinNote={() => {}}
+            />
+          ))}
         </div>
       </div>
 
