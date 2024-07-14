@@ -6,6 +6,7 @@ import AddEditNotes from "./AddEditNotes";
 import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
+import Toast from "../../components/ToasMtessage/Toast";
 
 const Home = () => {
   // state untuk mengatur tampilan modal tambah/edit
@@ -15,9 +16,19 @@ const Home = () => {
     data: null,
   });
 
+  const [showToastMsg, setShowToastMsg] = useState({
+    isShown: false,
+    message: "",
+    type: "add",
+  });
+
   const [allNote, setAllNote] = useState([]); // state untuk mengambil semua data note
   const [userInfo, setUserInfo] = useState(null); // state untuk menyimpan informasi pengguna yang didapat dari server.
   const navigate = useNavigate();
+
+  const handleEdit = (noteDetails) => {
+    setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
+  };
 
   // Get User Info
   const getUserInfo = async () => {
@@ -56,6 +67,21 @@ const Home = () => {
     }
   };
 
+  const showToastMessage = (message, type) => {
+    setShowToastMsg({
+      isShown: true,
+      message,
+      type,
+    });
+  };
+
+  const handleCloseToast = () => {
+    setShowToastMsg({
+      isShown: false,
+      message: "",
+    });
+  };
+
   // UsEffect, untuk pengambilan data
   useEffect(() => {
     // Memanggil fungsi getAllNotes untuk mendapatkan semua catatan
@@ -84,7 +110,9 @@ const Home = () => {
               content={item.content}
               tags={item.tags || []} // memastikan bahwa tags selalu berupa array untuk mencegah kesalahan.
               isPinned={item.isPinned}
-              onEdit={() => {}}
+              onEdit={() => {
+                handleEdit(item);
+              }}
               onDelete={() => {}}
               onPinNote={() => {}}
             />
@@ -101,6 +129,7 @@ const Home = () => {
         <MdAdd className="text-[32px] text-white" />
       </button>
 
+      {/* Modal untuk Add Edit Note */}
       <Modal
         isOpen={openAddEditModal.isShown}
         onRequestClose={() => {}}
@@ -119,8 +148,17 @@ const Home = () => {
             setOpenAddEditModal({ isShown: false, type: "add", data: null });
           }}
           getAllNotes={getAllNotes}
+          showToastMessage={showToastMessage}
         />
       </Modal>
+
+      {/* Toas Message */}
+      <Toast
+        isShown={showToastMsg.isShown}
+        message={showToastMsg.message}
+        type={showToastMsg.type}
+        onClose={handleCloseToast}
+      />
     </>
   );
 };
