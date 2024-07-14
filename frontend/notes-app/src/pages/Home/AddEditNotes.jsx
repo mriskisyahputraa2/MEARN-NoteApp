@@ -1,16 +1,43 @@
 import React, { useState } from "react";
 import TagInput from "../../components/Input/TagInput";
 import { MdClose } from "react-icons/md";
+import axiosInstance from "../../utils/axiosinstance";
 
-const AddEditNotes = ({ noteData, type, onClose }) => {
+const AddEditNotes = ({ noteData, type, onClose, getAllNotes }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
 
   const [error, setError] = useState(null);
 
-  const addNewNote = () => {};
-  const editNote = () => {};
+  // Add Note
+  const addNewNote = async () => {
+    try {
+      const response = await axiosInstance.post("/add-note", {
+        title,
+        content,
+        tags,
+      });
+
+      if (response.data && response.data.note) {
+        getAllNotes();
+        onClose();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      }
+    }
+  };
+
+  // Edit Note (dideklarasikan di luar blok try)
+  const editNote = async () => {
+    // Implementasi edit note sesuai kebutuhan Anda
+  };
 
   // function handleAddNote
   const handleAddNote = () => {
@@ -31,8 +58,8 @@ const AddEditNotes = ({ noteData, type, onClose }) => {
     } else {
       addNewNote(); // jika tidak, maka tambahkan note
     }
+    console.log(handleAddNote);
   };
-
   return (
     <>
       <div className="relative">
@@ -89,6 +116,5 @@ const AddEditNotes = ({ noteData, type, onClose }) => {
     </>
   );
 };
-// menit 49.44
 
 export default AddEditNotes;

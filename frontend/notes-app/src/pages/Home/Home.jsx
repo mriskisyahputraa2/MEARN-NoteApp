@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import NoteCard from "../../components/Cards/NoteCard";
-import moment from "moment";
 import { MdAdd } from "react-icons/md";
 import AddEditNotes from "./AddEditNotes";
 import Modal from "react-modal";
@@ -42,20 +41,30 @@ const Home = () => {
   // Get All Notes
   const getAllNotes = async () => {
     try {
+      // Mengirim permintaan GET ke endpoint "/get-all-note" menggunakan axiosInstance
       const response = await axiosInstance.get("/get-all-note");
-      console.log(response);
+
+      // Validasi, apakah respons memiliki properti 'data' dan 'notes'
       if (response.data && response.data.notes) {
+        // Jika ada, simpan data notes ke state allNote
         setAllNote(response.data.notes);
       }
+      // jika tidak,
     } catch (error) {
+      // Menampilkan pesan error di konsol jika terjadi kesalahan
       console.log("An unexpected error occurred. Please try again.");
     }
   };
 
-  // useEffet, maninpulasi data getUserInfo
+  // UsEffect, untuk pengambilan data
   useEffect(() => {
+    // Memanggil fungsi getAllNotes untuk mendapatkan semua catatan
     getAllNotes();
-    getUserInfo(); // Memanggil getUserInfo sekali saat komponen pertama kali dirender (karena array dependensi kosong []).
+
+    // Memanggil fungsi getUserInfo untuk mendapatkan informasi pengguna
+    getUserInfo();
+
+    // Fungsi pembersihan (tidak melakukan apa-apa di sini, tetapi disediakan untuk konsistensi)
     return () => {};
   }, []);
 
@@ -66,13 +75,14 @@ const Home = () => {
 
       <div className="container mx-auto">
         <div className="grid grid-cols-3 gap-4 mt-8">
+          {/* melakukan looping data dan ditampilkan di halaman Note Card */}
           {allNote.map((item, index) => (
             <NoteCard
               key={item._id}
               title={item.title}
               date={item.createdOn}
               content={item.content}
-              tags={item.tags || []} // Pastikan tags adalah array
+              tags={item.tags || []} // memastikan bahwa tags selalu berupa array untuk mencegah kesalahan.
               isPinned={item.isPinned}
               onEdit={() => {}}
               onDelete={() => {}}
@@ -85,7 +95,7 @@ const Home = () => {
       <button
         className="w-16 h-16 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600 absolute right-10 bottom-10"
         onClick={() => {
-          setOpenAddEditModal({ isShown: true, type: "add", add: null });
+          setOpenAddEditModal({ isShown: true, type: "add", data: null });
         }}
       >
         <MdAdd className="text-[32px] text-white" />
@@ -108,6 +118,7 @@ const Home = () => {
           onClose={() => {
             setOpenAddEditModal({ isShown: false, type: "add", data: null });
           }}
+          getAllNotes={getAllNotes}
         />
       </Modal>
     </>
