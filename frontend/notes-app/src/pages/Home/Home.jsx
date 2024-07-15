@@ -11,38 +11,30 @@ import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import addNotesImg from "../../assets/images/add-note.svg";
 
 const Home = () => {
-  // State untuk mengatur tampilan modal tambah/edit
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
     type: "add",
     data: null,
   });
 
-  // State untuk mengatur pesan toast
   const [showToastMsg, setShowToastMsg] = useState({
     isShown: false,
     message: "",
     type: "add",
   });
 
-  // State untuk menyimpan semua data note
   const [allNote, setAllNote] = useState([]);
-
-  // State untuk menyimpan informasi pengguna yang didapat dari server
   const [userInfo, setUserInfo] = useState(null);
-
   const navigate = useNavigate();
+  const [isSearch, setIsSearch] = useState(false);
 
-  // Fungsi untuk mengatur mode edit
   const handleEdit = (noteDetails) => {
     setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
   };
 
-  // Mendapatkan informasi pengguna
   const getUserInfo = async () => {
     try {
       const response = await axiosInstance.get("/get-user");
-
       if (response.data && response.data.user) {
         setUserInfo(response.data.user);
       }
@@ -54,20 +46,18 @@ const Home = () => {
     }
   };
 
-  // Mendapatkan semua catatan
   const getAllNotes = async () => {
     try {
       const response = await axiosInstance.get("/get-all-note");
-
       if (response.data && response.data.notes) {
         setAllNote(response.data.notes);
+        setIsSearch(false);
       }
     } catch (error) {
       console.log("An unexpected error occurred. Please try again.");
     }
   };
 
-  // Fungsi untuk menampilkan pesan toast
   const showToastMessage = (message, type) => {
     setShowToastMsg({
       isShown: true,
@@ -76,7 +66,6 @@ const Home = () => {
     });
   };
 
-  // Fungsi untuk menyembunyikan pesan toast
   const handleCloseToast = () => {
     setShowToastMsg({
       isShown: false,
@@ -85,13 +74,10 @@ const Home = () => {
     });
   };
 
-  // Fungsi untuk menghapus catatan
   const deleteNote = async (data) => {
     const noteId = data._id;
-
     try {
       const response = await axiosInstance.delete(`/delete-note/${noteId}`);
-
       if (response.data && !response.data.error) {
         showToastMessage("Note deleted successfully", "delete");
         getAllNotes();
@@ -107,7 +93,21 @@ const Home = () => {
     }
   };
 
-  // useEffect untuk pengambilan data
+  const onSearchNote = async (query) => {
+    try {
+      const response = await axiosInstance.get("/search-notes", {
+        params: { query },
+      });
+      console.log("Search response:", response.data);
+      if (response.data && response.data.notes) {
+        setIsSearch(true);
+        setAllNote(response.data.notes);
+      }
+    } catch (error) {
+      console.log("Search error:", error);
+    }
+  };
+
   useEffect(() => {
     getAllNotes();
     getUserInfo();
@@ -115,13 +115,10 @@ const Home = () => {
 
   return (
     <>
-      {/* Render Navbar jika userInfo tidak null */}
-      {userInfo && <Navbar userInfo={userInfo} />}
-
+      {<Navbar userInfo={userInfo} onSearchNote={onSearchNote} />}
       <div className="container mx-auto">
         {allNote.length > 0 ? (
           <div className="grid grid-cols-3 gap-4 mt-8">
-            {/* Melakukan looping data dan menampilkan di halaman Note Card */}
             {allNote.map((item) => (
               <NoteCard
                 key={item._id}
@@ -153,7 +150,6 @@ const Home = () => {
         <MdAdd className="text-[32px] text-white" />
       </button>
 
-      {/* Modal untuk Add Edit Note */}
       <Modal
         isOpen={openAddEditModal.isShown}
         onRequestClose={() =>
@@ -178,7 +174,6 @@ const Home = () => {
         />
       </Modal>
 
-      {/* Toast Message */}
       <Toast
         isShown={showToastMsg.isShown}
         message={showToastMsg.message}
