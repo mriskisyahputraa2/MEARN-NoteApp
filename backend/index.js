@@ -339,5 +339,45 @@ app.put("/update-note-pinned/:noteId", authenticateToken, async (req, res) => {
   }
 });
 
+// Search Note
+app.get("/search-notes", authenticateToken, async (req, res) => {
+  const { user } = req.user; // Mengambil user dari req yang sudah di set oleh middleware authenticateToken
+  const { query } = req.query; // Mengambil query dari query string
+
+  // validasi query, jika query tidak ada, tampilkan status dan pesan
+  if (!query) {
+    return res.status(400).json({
+      message: "Search query is required",
+    });
+  }
+
+  // mencoba search note
+  try {
+    // melakukan pencarian note di database menggunakan moongose
+    const matchingNotes = await Note.find({
+      userId: user._id, // mencari note yang dimiliki oleh pengguna dengan user._id.
+      // Menggunakan operator 'or' untuk mencocokkan catatan yang 'title' atau 'content-nya' sesuai dengan query.
+      $or: [
+        { title: { $regex: new RegExp(query, "i") } }, // dengan menggunakan regex yang tidak case-sensitive ("i").
+        { content: { $regex: new RegExp(query, "i") } }, // dengan menggunakan regex yang tidak case-sensitive ("i").
+      ],
+    });
+
+    // jika berhasil mengembalikan respons dengan status 200 dan objek JSON yang berisi: tidak ada error, daftar catatan, dan message
+    return res.json({
+      error: false,
+      notes: matchingNotes,
+      message: "Notes matching the search query retrieved successfully",
+    });
+
+    // jika gagal, tampilkan status 500 dan message
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 app.listen(8000);
 module.exports = app;
