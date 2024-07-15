@@ -7,62 +7,62 @@ import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosinstance";
 import Toast from "../../components/ToasMtessage/Toast";
+import EmptyCard from "../../components/EmptyCard/EmptyCard";
+import addNotesImg from "../../assets/images/add-note.svg";
 
 const Home = () => {
-  // state untuk mengatur tampilan modal tambah/edit
+  // State untuk mengatur tampilan modal tambah/edit
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
     type: "add",
     data: null,
   });
 
+  // State untuk mengatur pesan toast
   const [showToastMsg, setShowToastMsg] = useState({
     isShown: false,
     message: "",
     type: "add",
   });
 
-  const [allNote, setAllNote] = useState([]); // state untuk mengambil semua data note
-  const [userInfo, setUserInfo] = useState(null); // state untuk menyimpan informasi pengguna yang didapat dari server.
+  // State untuk menyimpan semua data note
+  const [allNote, setAllNote] = useState([]);
+
+  // State untuk menyimpan informasi pengguna yang didapat dari server
+  const [userInfo, setUserInfo] = useState(null);
+
   const navigate = useNavigate();
 
+  // Fungsi untuk mengatur mode edit
   const handleEdit = (noteDetails) => {
     setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
   };
 
-  // Get User Info
+  // Mendapatkan informasi pengguna
   const getUserInfo = async () => {
     try {
-      const response = await axiosInstance.get("/get-user"); // mendapatkan informasi pengguna dari endpoint "/get-user."
+      const response = await axiosInstance.get("/get-user");
 
-      // validasi, jika response data pengguna ada
       if (response.data && response.data.user) {
-        setUserInfo(response.data.user); // maka tampikan
+        setUserInfo(response.data.user);
       }
-      // jika terjadi error
     } catch (error) {
-      // validasi, jika tidak ada data penggunanya, maka response status 401(Unauthorized)
-      if (error.response.status === 401) {
-        localStorage.clear(); // bersihkan localStoragenya
-        navigate("/login"); // arahkan pengguna kembali kehalaman login
+      if (error.response && error.response.status === 401) {
+        localStorage.clear();
+        navigate("/login");
       }
     }
   };
 
-  // Get All Notes
+  // Mendapatkan semua catatan
   const getAllNotes = async () => {
     try {
-      // Mengirim permintaan GET ke endpoint "/get-all-note" menggunakan axiosInstance
       const response = await axiosInstance.get("/get-all-note");
 
-      // Validasi, apakah respons memiliki properti 'data' dan 'notes'
       if (response.data && response.data.notes) {
-        // Jika ada, simpan data notes ke state allNote
         setAllNote(response.data.notes);
       }
-      // jika tidak,
     } catch (error) {
-      // Menampilkan pesan error di konsol jika terjadi kesalahan
       console.log("An unexpected error occurred. Please try again.");
     }
   };
@@ -70,63 +70,85 @@ const Home = () => {
   // Fungsi untuk menampilkan pesan toast
   const showToastMessage = (message, type) => {
     setShowToastMsg({
-      isShown: true, // menandakan pesan akan ditampilkan
-      message, // pesan yang akan ditampilkan
-      type, // jenis tipe toast "delete" atau "update"
+      isShown: true,
+      message,
+      type,
     });
   };
 
   // Fungsi untuk menyembunyikan pesan toast
   const handleCloseToast = () => {
     setShowToastMsg({
-      isShown: false, // menyembunyikan pesan yang ditampilkan
-      message: "", // tidak ada pesan yang akan ditampilkan
+      isShown: false,
+      message: "",
+      type: "",
     });
   };
 
-  // UsEffect, untuk pengambilan data
+  // Fungsi untuk menghapus catatan
+  const deleteNote = async (data) => {
+    const noteId = data._id;
+
+    try {
+      const response = await axiosInstance.delete(`/delete-note/${noteId}`);
+
+      if (response.data && !response.data.error) {
+        showToastMessage("Note deleted successfully", "delete");
+        getAllNotes();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        console.log("An unexpected error occurred. Please try again.");
+      }
+    }
+  };
+
+  // useEffect untuk pengambilan data
   useEffect(() => {
-    // Memanggil fungsi getAllNotes untuk mendapatkan semua catatan
     getAllNotes();
-
-    // Memanggil fungsi getUserInfo untuk mendapatkan informasi pengguna
     getUserInfo();
-
-    // Fungsi pembersihan (tidak melakukan apa-apa di sini, tetapi disediakan untuk konsistensi)
-    return () => {};
   }, []);
 
   return (
     <>
-      {/* render, jika userInfo nya agar tidak null */}
+      {/* Render Navbar jika userInfo tidak null */}
       {userInfo && <Navbar userInfo={userInfo} />}
 
       <div className="container mx-auto">
-        <div className="grid grid-cols-3 gap-4 mt-8">
-          {/* melakukan looping data dan ditampilkan di halaman Note Card */}
-          {allNote.map((item, index) => (
-            <NoteCard
-              key={item._id}
-              title={item.title}
-              date={item.createdOn}
-              content={item.content}
-              tags={item.tags || []} // memastikan bahwa tags selalu berupa array untuk mencegah kesalahan.
-              isPinned={item.isPinned}
-              onEdit={() => {
-                handleEdit(item);
-              }}
-              onDelete={() => {}}
-              onPinNote={() => {}}
-            />
-          ))}
-        </div>
+        {allNote.length > 0 ? (
+          <div className="grid grid-cols-3 gap-4 mt-8">
+            {/* Melakukan looping data dan menampilkan di halaman Note Card */}
+            {allNote.map((item) => (
+              <NoteCard
+                key={item._id}
+                title={item.title}
+                date={item.createdOn}
+                content={item.content}
+                tags={item.tags || []}
+                isPinned={item.isPinned}
+                onEdit={() => handleEdit(item)}
+                onDelete={() => deleteNote(item)}
+                onPinNote={() => {}}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyCard
+            imgSrc={addNotesImg}
+            message={`Start creating your first note! Click the 'Add' button to jot down your thoughts, ideas, and reminders. Let's get started!`}
+          />
+        )}
       </div>
 
       <button
         className="w-16 h-16 flex items-center justify-center rounded-2xl bg-primary hover:bg-blue-600 absolute right-10 bottom-10"
-        onClick={() => {
-          setOpenAddEditModal({ isShown: true, type: "add", data: null });
-        }}
+        onClick={() =>
+          setOpenAddEditModal({ isShown: true, type: "add", data: null })
+        }
       >
         <MdAdd className="text-[32px] text-white" />
       </button>
@@ -134,32 +156,34 @@ const Home = () => {
       {/* Modal untuk Add Edit Note */}
       <Modal
         isOpen={openAddEditModal.isShown}
-        onRequestClose={() => {}}
+        onRequestClose={() =>
+          setOpenAddEditModal({ isShown: false, type: "add", data: null })
+        }
         style={{
           overlay: {
             backgroundColor: "rgba(0,0,0,0.2)",
           },
         }}
-        contenLabel=""
+        contentLabel=""
         className="w-[40%] max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5 overflow-scroll"
       >
         <AddEditNotes
           type={openAddEditModal.type}
           noteData={openAddEditModal.data}
-          onClose={() => {
-            setOpenAddEditModal({ isShown: false, type: "add", data: null });
-          }}
+          onClose={() =>
+            setOpenAddEditModal({ isShown: false, type: "add", data: null })
+          }
           getAllNotes={getAllNotes}
           showToastMessage={showToastMessage}
         />
       </Modal>
 
-      {/* Toas Message */}
+      {/* Toast Message */}
       <Toast
-        isShown={showToastMsg.isShown} // props req, apakah toast harus ditampilkan atau tidak.
-        message={showToastMsg.message} // props req, apakah message toast harus ditampilkan atau tidak
-        type={showToastMsg.type} // props req, apakah type toast harus ditampilkan atau tidak
-        onClose={handleCloseToast} // props req, fungsi yang akan dipanggil untuk menutup toast
+        isShown={showToastMsg.isShown}
+        message={showToastMsg.message}
+        type={showToastMsg.type}
+        onClose={handleCloseToast}
       />
     </>
   );
