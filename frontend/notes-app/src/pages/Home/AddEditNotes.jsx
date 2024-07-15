@@ -10,6 +10,7 @@ const AddEditNotes = ({
   getAllNotes,
   showToastMessage,
 }) => {
+  // ?. (adalah operator chaining) untuk menghindari error ketika datanya adalah null atau undefined. jika datanya kosong maka akan mengembalikan nilai undefined
   const [title, setTitle] = useState(noteData?.title || "");
   const [content, setContent] = useState(noteData?.content || "");
   const [tags, setTags] = useState(noteData?.tags || []);
@@ -41,7 +42,7 @@ const AddEditNotes = ({
     }
   };
 
-  // Edit Note (dideklarasikan di luar blok try)
+  // Edit Note
   const editNote = async () => {
     const noteId = noteData._id;
     try {

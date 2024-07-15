@@ -67,18 +67,20 @@ const Home = () => {
     }
   };
 
+  // Fungsi untuk menampilkan pesan toast
   const showToastMessage = (message, type) => {
     setShowToastMsg({
-      isShown: true,
-      message,
-      type,
+      isShown: true, // menandakan pesan akan ditampilkan
+      message, // pesan yang akan ditampilkan
+      type, // jenis tipe toast "delete" atau "update"
     });
   };
 
+  // Fungsi untuk menyembunyikan pesan toast
   const handleCloseToast = () => {
     setShowToastMsg({
-      isShown: false,
-      message: "",
+      isShown: false, // menyembunyikan pesan yang ditampilkan
+      message: "", // tidak ada pesan yang akan ditampilkan
     });
   };
 
@@ -154,10 +156,10 @@ const Home = () => {
 
       {/* Toas Message */}
       <Toast
-        isShown={showToastMsg.isShown}
-        message={showToastMsg.message}
-        type={showToastMsg.type}
-        onClose={handleCloseToast}
+        isShown={showToastMsg.isShown} // props req, apakah toast harus ditampilkan atau tidak.
+        message={showToastMsg.message} // props req, apakah message toast harus ditampilkan atau tidak
+        type={showToastMsg.type} // props req, apakah type toast harus ditampilkan atau tidak
+        onClose={handleCloseToast} // props req, fungsi yang akan dipanggil untuk menutup toast
       />
     </>
   );
