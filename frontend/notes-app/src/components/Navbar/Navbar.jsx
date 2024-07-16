@@ -3,17 +3,19 @@ import ProfileInfo from "../Cards/ProfileInfo";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../SearchBar/SearchBar";
 
-const Navbar = ({ userInfo, onSearchNote }) => {
+const Navbar = ({ userInfo, onSearchNote, handleClearSearch }) => {
   // Mendeklarasikan state searchQuery untuk menyimpan query pencarian.
   const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
 
+  // button logout
   const onLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
+  // handle search
   const handleSearch = () => {
     if (searchQuery) {
       onSearchNote(searchQuery);
@@ -23,7 +25,7 @@ const Navbar = ({ userInfo, onSearchNote }) => {
   // function, untuk mengatur searchQuery menjadi string kosong untuk membersihkan pencarian.
   const onClearSearch = () => {
     setSearchQuery("");
-    // onSearchNote(""); // Tambahkan ini untuk membersihkan hasil pencarian di komponen utama
+    handleClearSearch();
   };
 
   return (

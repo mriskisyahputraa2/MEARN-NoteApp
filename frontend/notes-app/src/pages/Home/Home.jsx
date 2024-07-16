@@ -9,6 +9,7 @@ import axiosInstance from "../../utils/axiosinstance";
 import Toast from "../../components/ToasMtessage/Toast";
 import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import addNotesImg from "../../assets/images/add-note.svg";
+import noDataImg from "../../assets/images/no-data.jpg";
 
 const Home = () => {
   const [openAddEditModal, setOpenAddEditModal] = useState({
@@ -108,6 +109,30 @@ const Home = () => {
     }
   };
 
+  const updateIsPinned = async (noteData) => {
+    const noteId = noteData._id;
+    try {
+      const response = await axiosInstance.put(
+        "/update-note-pinned/" + noteId,
+        {
+          isPinned: !noteData.isPinned,
+        }
+      );
+
+      if (response.data && response.data.note) {
+        showToastMessage("Note Updated successfully");
+        getAllNotes();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setIsSearch(false);
+    getAllNotes();
+  };
+
   useEffect(() => {
     getAllNotes();
     getUserInfo();
@@ -115,7 +140,13 @@ const Home = () => {
 
   return (
     <>
-      {<Navbar userInfo={userInfo} onSearchNote={onSearchNote} />}
+      {
+        <Navbar
+          userInfo={userInfo}
+          onSearchNote={onSearchNote}
+          handleClearSearch={handleClearSearch}
+        />
+      }
       <div className="container mx-auto">
         {allNote.length > 0 ? (
           <div className="grid grid-cols-3 gap-4 mt-8">
@@ -129,14 +160,20 @@ const Home = () => {
                 isPinned={item.isPinned}
                 onEdit={() => handleEdit(item)}
                 onDelete={() => deleteNote(item)}
-                onPinNote={() => {}}
+                onPinNote={() => {
+                  updateIsPinned(item);
+                }}
               />
             ))}
           </div>
         ) : (
           <EmptyCard
-            imgSrc={addNotesImg}
-            message={`Start creating your first note! Click the 'Add' button to jot down your thoughts, ideas, and reminders. Let's get started!`}
+            imgSrc={isSearch ? noDataImg : addNotesImg}
+            message={
+              isSearch
+                ? `Opps! No notes found matching your search.`
+                : `Start creating your first note! Click the 'Add' button to jot down your thoughts, ideas, and reminders. Let's get started!`
+            }
           />
         )}
       </div>
