@@ -35,7 +35,7 @@ const NoteCard = ({
 
           <div className="flex items-center justify-between mt-2">
             <div className="text-xs text-slate-500">
-              {tags.map((item) => `#${item}`).join(" ")}
+              {tags.map((item) => `#${item}`).join(" ")}z
             </div>
             <div className="flex items-center gap-2">
               <MdCreate

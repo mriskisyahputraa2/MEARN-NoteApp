@@ -190,7 +190,7 @@ const Home = () => {
       <Modal
         isOpen={openAddEditModal.isShown}
         onRequestClose={() =>
-          setOpenAddEditModal({ isShown: false, type: "add", data: null })
+          setOpenAddEditModal({ isShown: true, type: "add", data: null })
         }
         style={{
           overlay: {
